@@ -4,7 +4,9 @@ import 'package:davis_client/models/assistant_state.dart';
 import 'package:davis_client/models/completion_state.dart';
 import 'package:davis_client/providers/app_providers.dart';
 import 'package:davis_client/providers/camera_provider.dart';
+import 'package:davis_client/services/location_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import '../services/audio_recorder_service.dart';
 import '../services/audio_player_service.dart';
 import '../services/backend_service.dart';
@@ -14,12 +16,18 @@ class AssistantStateNotifier extends StateNotifier<AssistantState> {
 
   final AudioRecorderService recorder;
   final AudioPlayerService player;
+  final LocationService locator;
   final BackendService backend;
 
   bool _isResponseLoaded = false;
 
-  AssistantStateNotifier(this.ref, this.recorder, this.player, this.backend)
-    : super(AssistantState(completionState: CompletionState.idle));
+  AssistantStateNotifier(
+    this.ref,
+    this.recorder,
+    this.player,
+    this.locator,
+    this.backend,
+  ) : super(AssistantState(completionState: CompletionState.idle));
 
   void capturePhoto() {
     if (state.completionState != CompletionState.idle) return;
@@ -36,6 +44,7 @@ class AssistantStateNotifier extends StateNotifier<AssistantState> {
       state = state.copyWith(completionState: CompletionState.listening);
       await player.playSound(AppSound.start);
       await recorder.startRecording();
+      locator.updateLocation();
     } catch (e) {
       state = state.copyWith(
         errorMessage: "Error starting recording: $e",
@@ -67,9 +76,12 @@ class AssistantStateNotifier extends StateNotifier<AssistantState> {
         imgFile = File(capturedImage.path);
       }
 
+      Position? curLocation = locator.getLocation();
+
       File responseAudioFile = await backend.getAssistantResponse(
         audioFile,
         imgFile,
+        curLocation,
       );
 
       _isResponseLoaded = true;
@@ -116,6 +128,7 @@ final assistantStateProvider =
         ref,
         ref.read(audioRecorderProvider),
         ref.read(audioPlayerServiceProvider),
+        ref.read(locationServiceProvider),
         ref.read(backendServiceProvider),
       ),
     );

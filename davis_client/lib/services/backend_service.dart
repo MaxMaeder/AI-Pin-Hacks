@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:davis_client/util/device_id.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
@@ -8,17 +9,28 @@ class BackendService {
   final String apiUrl = "https://glasses.mmaeder.com/api/dev/handle";
 
   /// Sends recorded audio to the backend and receives processed audio response.
-  Future<File> getAssistantResponse(File speechFile, File? imgFile) async {
+  Future<File> getAssistantResponse(
+    File speechFile,
+    File? imgFile,
+    Position? location,
+  ) async {
     List<int> audioBytes = await speechFile.readAsBytes();
     List<int>? imgBytes = await imgFile?.readAsBytes();
 
-    final String metadataJson = jsonEncode({
+    final Map<String, dynamic> metadata = {
       "audioSize": audioBytes.length,
       "audioFormat": "m4a",
       "imageSize": imgBytes?.length ?? 0,
       "deviceId": await getDeviceId(),
       "audioBitrate": "64k",
-    });
+    };
+
+    if (location != null) {
+      metadata["latitude"] = location.latitude;
+      metadata["longitude"] = location.longitude;
+    }
+
+    final String metadataJson = jsonEncode(metadata);
 
     // Ensure metadata is 512 bytes (null-terminated & padded)
     List<int> metadataBytes = ascii.encode(metadataJson);
