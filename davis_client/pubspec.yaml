@@ -30,7 +30,10 @@ flutter:
     - assets/sounds/start.wav
     - assets/sounds/stop.wav
     - assets/sounds/shutter.wav
-    - assets/sounds/sample.m4a
+    - assets/sounds/loading/loading-1.wav
+    - assets/sounds/loading/loading-2.wav
+    - assets/sounds/loading/loading-3.wav
+    - assets/sounds/loading/loading-4.wav
 
   fonts:
     - family: HumaneFont

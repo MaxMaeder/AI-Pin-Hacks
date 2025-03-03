@@ -16,6 +16,8 @@ class AssistantStateNotifier extends StateNotifier<AssistantState> {
   final AudioPlayerService player;
   final BackendService backend;
 
+  bool _isResponseLoaded = false;
+
   AssistantStateNotifier(this.ref, this.recorder, this.player, this.backend)
     : super(AssistantState(completionState: CompletionState.idle));
 
@@ -44,8 +46,13 @@ class AssistantStateNotifier extends StateNotifier<AssistantState> {
 
   Future<void> stopRecording() async {
     try {
+      _isResponseLoaded = false;
       state = state.copyWith(completionState: CompletionState.thinking);
-      await player.playSound(AppSound.stop);
+
+      await player.playSound(
+        AppSound.stop,
+        onComplete: _scheduleLoadingMessage,
+      );
 
       String? audioFilePath = await recorder.stopRecording();
       if (audioFilePath == null) {
@@ -64,6 +71,8 @@ class AssistantStateNotifier extends StateNotifier<AssistantState> {
         audioFile,
         imgFile,
       );
+
+      _isResponseLoaded = false;
       state = state.copyWith(completionState: CompletionState.responding);
 
       ref.read(cameraStateProvider.notifier).discardPhoto();
@@ -80,6 +89,13 @@ class AssistantStateNotifier extends StateNotifier<AssistantState> {
         completionState: CompletionState.idle,
       );
     }
+  }
+
+  Future<void> _scheduleLoadingMessage() async {
+    await Future.delayed(Duration(milliseconds: 500));
+    if (_isResponseLoaded) return;
+
+    player.playSound(AppSound.loading);
   }
 
   void clearError() {
