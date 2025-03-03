@@ -46,6 +46,17 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>We need microphone access to record audio.</string>
+	<string>To speak to Davis, we need to access your mic.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>To use vision with Davis, we need to access your camera.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+	<key>KeychainSharing</key>
+	<array>
+		<string>com.mmaeder.DavisClient</string>
+	</array>
 </dict>
 </plist>

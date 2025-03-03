@@ -1,39 +1,53 @@
-import 'package:davis_client/widgets/StatusText.dart';
+import 'package:davis_client/models/completion_state.dart';
+import 'package:davis_client/widgets/camera_preview.dart';
+import 'package:davis_client/widgets/error_snackbar.dart';
+import 'package:davis_client/widgets/status_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/speech_provider.dart';
+import '../providers/assistant_provider.dart';
 
 class SpeechScreen extends ConsumerWidget {
   const SpeechScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(speechStateProvider);
-    final speechController = ref.read(speechStateProvider.notifier);
+    final stateNotifier = ref.watch(assistantStateProvider.notifier);
+    final state = ref.watch(assistantStateProvider);
 
-    String displayText = "Hold to Speak";
-    switch (state) {
-      case RecordingState.listening:
-        displayText = "Listening...";
-        break;
-      case RecordingState.thinking:
-        displayText = "Thinking...";
-        break;
-      case RecordingState.responding:
-        displayText = "Responding...";
-        break;
-      case RecordingState.idle:
-        displayText = "Hold to Speak";
-        break;
-    }
+    ref.listen(assistantStateProvider, (previous, next) {
+      if (next.errorMessage != null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(ErrorSnackbar.show(next.errorMessage!));
+        stateNotifier.clearError();
+      }
+    });
 
     return Scaffold(
       backgroundColor: Colors.black,
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onLongPress: speechController.startRecording,
-        onLongPressUp: speechController.stopRecording,
-        child: Center(child: StatusText(displayText)),
+        onLongPress: stateNotifier.startRecording,
+        onLongPressUp: stateNotifier.stopRecording,
+        onTap: () {
+          if (state.completionState == CompletionState.idle) {
+            stateNotifier.capturePhoto();
+          } else {
+            stateNotifier.cancelPlayback();
+          }
+        },
+        child: Center(
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              StatusText(
+                message: state.completionState.message,
+                details: state.completionState.details,
+              ),
+              VisionCameraPreview(),
+            ],
+          ),
+        ),
       ),
     );
   }
