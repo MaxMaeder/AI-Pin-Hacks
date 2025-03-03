@@ -22,7 +22,11 @@ class AssistantStateNotifier extends StateNotifier<AssistantState> {
   void capturePhoto() {
     if (state.completionState != CompletionState.idle) return;
 
-    ref.read(cameraStateProvider.notifier).capturePhoto();
+    try {
+      ref.read(cameraStateProvider.notifier).capturePhoto();
+    } catch (e) {
+      state = state.copyWith(errorMessage: "Error capturing photo: $e");
+    }
   }
 
   Future<void> startRecording() async {

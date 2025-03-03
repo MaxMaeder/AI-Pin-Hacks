@@ -36,22 +36,18 @@ class CameraStateNotifier extends StateNotifier<CameraState> {
   Future<void> capturePhoto() async {
     if (!_isInitialized || _controller == null) return;
 
-    try {
-      state = state.copyWithoutImg().copyWith(isPreviewDisplayed: true);
-      await Future.delayed(Duration(milliseconds: 500));
+    state = state.copyWithoutImg().copyWith(isPreviewDisplayed: true);
+    await Future.delayed(Duration(milliseconds: 500));
 
-      state = state.copyWith(capturedImage: await _controller!.takePicture());
-      await player.playSound(AppSound.shutter);
+    state = state.copyWith(capturedImage: await _controller!.takePicture());
+    await player.playSound(AppSound.shutter);
 
-      await Future.delayed(Duration(seconds: 1));
-      state = state.copyWith(isPreviewDisplayed: false);
-    } catch (e) {
-      print("Error capturing photo: $e");
-    }
+    await Future.delayed(Duration(seconds: 1));
+    state = state.copyWith(isPreviewDisplayed: false);
   }
 
   void discardPhoto() {
-    state = state.copyWith(capturedImage: null);
+    state = state.copyWithoutImg();
   }
 
   Future<void> disposeCamera() async {

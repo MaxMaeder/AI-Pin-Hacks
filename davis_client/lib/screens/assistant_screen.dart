@@ -1,13 +1,13 @@
 import 'package:davis_client/models/completion_state.dart';
 import 'package:davis_client/widgets/camera_preview.dart';
+import 'package:davis_client/widgets/completion_status.dart';
 import 'package:davis_client/widgets/error_snackbar.dart';
-import 'package:davis_client/widgets/status_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/assistant_provider.dart';
 
-class SpeechScreen extends ConsumerWidget {
-  const SpeechScreen({super.key});
+class AssistantScreen extends ConsumerWidget {
+  const AssistantScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -39,13 +39,7 @@ class SpeechScreen extends ConsumerWidget {
         child: Center(
           child: Stack(
             alignment: Alignment.center,
-            children: [
-              StatusText(
-                message: state.completionState.message,
-                details: state.completionState.details,
-              ),
-              VisionCameraPreview(),
-            ],
+            children: [CompletionStatus(), VisionCameraPreview()],
           ),
         ),
       ),
