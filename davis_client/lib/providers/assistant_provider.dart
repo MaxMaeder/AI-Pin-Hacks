@@ -72,7 +72,7 @@ class AssistantStateNotifier extends StateNotifier<AssistantState> {
         imgFile,
       );
 
-      _isResponseLoaded = false;
+      _isResponseLoaded = true;
       state = state.copyWith(completionState: CompletionState.responding);
 
       ref.read(cameraStateProvider.notifier).discardPhoto();

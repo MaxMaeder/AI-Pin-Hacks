@@ -8,11 +8,8 @@ class CameraStateNotifier extends StateNotifier<CameraState> {
   final AudioPlayerService player;
 
   CameraController? _controller;
-  bool _isInitialized = false;
 
-  CameraStateNotifier(this.player) : super(CameraState()) {
-    _initializeCamera();
-  }
+  CameraStateNotifier(this.player) : super(CameraState());
 
   Future<void> _initializeCamera() async {
     final cameras = await availableCameras();
@@ -25,7 +22,6 @@ class CameraStateNotifier extends StateNotifier<CameraState> {
       );
 
       await _controller!.initialize();
-      _isInitialized = true;
     }
   }
 
@@ -34,7 +30,9 @@ class CameraStateNotifier extends StateNotifier<CameraState> {
   }
 
   Future<void> capturePhoto() async {
-    if (!_isInitialized || _controller == null) return;
+    await _initializeCamera();
+
+    if (_controller == null) return;
 
     state = state.copyWithoutImg().copyWith(isPreviewDisplayed: true);
     await Future.delayed(Duration(milliseconds: 500));
@@ -44,15 +42,17 @@ class CameraStateNotifier extends StateNotifier<CameraState> {
 
     await Future.delayed(Duration(seconds: 1));
     state = state.copyWith(isPreviewDisplayed: false);
+
+    await _disposeCamera();
   }
 
   void discardPhoto() {
     state = state.copyWithoutImg();
   }
 
-  Future<void> disposeCamera() async {
+  Future<void> _disposeCamera() async {
     await _controller?.dispose();
-    _isInitialized = false;
+    _controller = null;
   }
 }
 
