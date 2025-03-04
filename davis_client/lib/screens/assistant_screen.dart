@@ -2,6 +2,7 @@ import 'package:davis_client/models/completion_state.dart';
 import 'package:davis_client/widgets/camera_preview.dart';
 import 'package:davis_client/widgets/completion_status.dart';
 import 'package:davis_client/widgets/error_snackbar.dart';
+import 'package:davis_client/widgets/permissions_warning.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/assistant_provider.dart';
@@ -36,11 +37,17 @@ class AssistantScreen extends ConsumerWidget {
             stateNotifier.cancelPlayback();
           }
         },
-        child: Center(
-          child: Stack(
-            alignment: Alignment.center,
-            children: [CompletionStatus(), VisionCameraPreview()],
-          ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Center(
+              child: Stack(
+                alignment: Alignment.center,
+                children: [CompletionStatus(), VisionCameraPreview()],
+              ),
+            ),
+            PermissionsWarning(),
+          ],
         ),
       ),
     );

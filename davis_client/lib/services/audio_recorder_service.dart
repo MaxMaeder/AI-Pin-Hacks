@@ -1,3 +1,5 @@
+import 'package:davis_client/models/app_permission.dart';
+import 'package:davis_client/util/permission_helper.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -6,12 +8,8 @@ class AudioRecorderService {
   DateTime? recordingStartTime;
   String? recordedFilePath;
 
-  Future<bool> checkPermission() async {
-    return await record.hasPermission();
-  }
-
   Future<void> startRecording() async {
-    if (!await checkPermission()) {
+    if (!await isPermissionGranted(AppPermission.microphone)) {
       throw Exception("Microphone permission denied");
     }
 

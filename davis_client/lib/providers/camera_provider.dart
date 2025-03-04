@@ -1,6 +1,8 @@
+import 'package:davis_client/models/app_permission.dart';
 import 'package:davis_client/models/camera_state.dart';
 import 'package:davis_client/providers/app_providers.dart';
 import 'package:davis_client/services/audio_player_service.dart';
+import 'package:davis_client/util/permission_helper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:camera/camera.dart';
 
@@ -12,6 +14,10 @@ class CameraStateNotifier extends StateNotifier<CameraState> {
   CameraStateNotifier(this.player) : super(CameraState());
 
   Future<void> _initializeCamera() async {
+    if (!await isPermissionGranted(AppPermission.camera)) {
+      throw Exception("Camera permission denied");
+    }
+
     final cameras = await availableCameras();
     if (cameras.isNotEmpty) {
       _controller = CameraController(

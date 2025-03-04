@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'package:davis_client/models/app_permission.dart';
 import 'package:davis_client/models/assistant_state.dart';
 import 'package:davis_client/models/completion_state.dart';
 import 'package:davis_client/providers/app_providers.dart';
 import 'package:davis_client/providers/camera_provider.dart';
 import 'package:davis_client/services/location_service.dart';
+import 'package:davis_client/util/permission_helper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import '../services/audio_recorder_service.dart';
@@ -29,8 +31,17 @@ class AssistantStateNotifier extends StateNotifier<AssistantState> {
     this.backend,
   ) : super(AssistantState(completionState: CompletionState.idle));
 
-  void capturePhoto() {
+  Future<bool> _canDoCompletion({bool vision = false}) async {
+    if (vision && !await isPermissionGranted(AppPermission.camera)) {
+      return false;
+    }
+
+    return await isPermissionGranted(AppPermission.microphone);
+  }
+
+  void capturePhoto() async {
     if (state.completionState != CompletionState.idle) return;
+    if (!await _canDoCompletion(vision: true)) return;
 
     try {
       ref.read(cameraStateProvider.notifier).capturePhoto();
@@ -40,6 +51,8 @@ class AssistantStateNotifier extends StateNotifier<AssistantState> {
   }
 
   Future<void> startRecording() async {
+    if (!await _canDoCompletion()) return;
+
     try {
       state = state.copyWith(completionState: CompletionState.listening);
       await player.playSound(AppSound.start);

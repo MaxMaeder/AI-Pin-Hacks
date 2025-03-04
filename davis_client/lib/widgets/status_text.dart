@@ -4,8 +4,14 @@ import 'package:flutter/material.dart';
 class StatusText extends StatelessWidget {
   final String message;
   final String? details;
+  final bool disabled;
 
-  const StatusText({super.key, required this.message, this.details});
+  const StatusText({
+    super.key,
+    required this.message,
+    this.details,
+    this.disabled = false,
+  });
 
   Text _styledText(String text, {required double fontSize}) {
     return Text(
@@ -13,7 +19,7 @@ class StatusText extends StatelessWidget {
       style: TextStyle(
         fontSize: fontSize,
         fontWeight: FontWeight.bold,
-        color: UiConstants.accentColor,
+        color: disabled ? Colors.white70 : UiConstants.accentColor,
       ),
     );
   }
