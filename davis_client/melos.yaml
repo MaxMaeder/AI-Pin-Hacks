@@ -1,0 +1,14 @@
+name: davis_client
+
+packages:
+  - .
+
+scripts:
+  build-android-apks:
+    run: |
+      flutter build appbundle
+      rm build/app/outputs/apk/release/app-release.apks
+      bundletool build-apks --bundle=build/app/outputs/bundle/release/app-release.aab --output=build/app/outputs/apk/release/app-release.apks
+  install-android-apks:
+    run: |
+      bundletool install-apks --apks=build/app/outputs/apk/release/app-release.apks
